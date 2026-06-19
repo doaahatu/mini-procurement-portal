@@ -18,6 +18,7 @@
       "@org/api/products": ["libs/api/products/src/index.ts"],
       "@org/models": ["libs/shared/models/src/index.ts"],
       "@org/shop/data": ["libs/shop/data/src/index.ts"],
+      "@org/shop/feature-auth": ["libs/shop/feature-auth/src/index.ts"],
       "@org/shop/feature-product-detail": [
         "libs/shop/feature-product-detail/src/index.ts"
       ],

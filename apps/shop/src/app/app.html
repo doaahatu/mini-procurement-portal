@@ -2,8 +2,23 @@
   <div class="container">
     <h1>{{ title }}</h1>
     <nav>
-      <a routerLink="/products" routerLinkActive="active">Products</a>
-    </nav>
+  <a routerLink="/products" routerLinkActive="active">Catalog</a>
+
+  <a
+    routerLink="/create-item"
+    routerLinkActive="active"
+    style="margin-left: 16px;"
+  >
+    Create Item
+  </a>
+
+  <button
+    style="margin-left: 12px; padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer;"
+    (click)="logout()"
+  >
+    Logout
+  </button>
+</nav>
   </div>
 </header>
 
@@ -13,7 +28,7 @@
 
 <footer class="app-footer">
   <div class="container">
-    <p>© 2025 Nx Shop Demo - Showcasing Nx Monorepo Features</p>
-    <p>Frontend (Angular) + Backend (Express) + Shared Libraries</p>
+    <p>© 2026 Mini Procurement Portal</p>
+    <p>Nx Monorepo • Angular • Express API • MongoDB</p>
   </div>
 </footer>

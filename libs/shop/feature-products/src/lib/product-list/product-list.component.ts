@@ -22,15 +22,15 @@ import {
   template: `
     <div class="product-list-container">
       <header class="page-header">
-        <h1>Our Products</h1>
-        <p>Explore our wide selection of high-quality products</p>
+        <h1>Catalog Items</h1>
+        <p>Browse and manage procurement catalog items</p>
       </header>
 
       <div class="filters-section">
         <div class="search-box">
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder="Search catalog items..."
             [(ngModel)]="searchTerm"
             (ngModelChange)="onSearchChange()"
             class="search-input"
@@ -69,7 +69,7 @@ import {
         />
       } @else {
         <div class="results-info">
-          Showing {{ products().length }} of {{ totalProducts() }} products
+          Showing {{ products().length }} of {{ totalProducts() }} catalog items
         </div>
 
         <shop-product-grid

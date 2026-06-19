@@ -52,4 +52,7 @@ vitest.config.*.timestamp*
 
 .nx/polygraph
 .nx/self-healing
-.nx/migrate-runs
+.nx/migrate-runs.env
+
+.env
+.env.*

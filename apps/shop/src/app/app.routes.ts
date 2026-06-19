@@ -1,4 +1,5 @@
 import { Route } from '@angular/router';
+import { authGuard } from '@org/shop/data';
 
 export const appRoutes: Route[] = [
   {
@@ -7,7 +8,26 @@ export const appRoutes: Route[] = [
     pathMatch: 'full',
   },
   {
+    path: 'signin',
+    loadComponent: () =>
+      import('@org/shop/feature-auth').then(m => m.SigninComponent),
+  },
+  {
+     path: 'signup',
+     loadComponent: () =>
+       import('@org/shop/feature-auth').then(m => m.SignupComponent),
+  },
+
+  {
+    path: 'create-item',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@org/shop/feature-auth').then(m => m.CreateItemComponent),
+  },
+
+  {
     path: 'products',
+    canActivate: [authGuard],
     loadChildren: () =>
       import('@org/shop/feature-products').then(m => m.featureProductsRoutes),
   },

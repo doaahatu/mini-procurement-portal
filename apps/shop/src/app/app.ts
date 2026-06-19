@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   imports: [RouterModule],
@@ -9,5 +9,14 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  protected title = 'Nx Shop Demo';
+  protected title = 'Mini Procurement Portal';
+
+  private readonly router = inject(Router);
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    this.router.navigate(['/signin']);
+  }
 }

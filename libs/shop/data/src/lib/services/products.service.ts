@@ -1,75 +1,70 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
-import { Product, ApiResponse, PaginatedResponse, ProductFilter } from '@org/models';
+import { Product } from '@org/models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductsService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3333/api';
 
-  // Signals for state management
-  private readonly loadingSignal = signal(false);
-  private readonly errorSignal = signal<string | null>(null);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
-  readonly loading = this.loadingSignal.asReadonly();
-  readonly error = this.errorSignal.asReadonly();
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
 
-  getProducts(
-    filter?: ProductFilter,
-    page = 1,
-    pageSize = 12
-  ): Observable<PaginatedResponse<Product>> {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+  }
 
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('pageSize', pageSize.toString());
-
-    if (filter) {
-      if (filter.category) {
-        params = params.set('category', filter.category);
-      }
-      if (filter.minPrice !== undefined) {
-        params = params.set('minPrice', filter.minPrice.toString());
-      }
-      if (filter.maxPrice !== undefined) {
-        params = params.set('maxPrice', filter.maxPrice.toString());
-      }
-      if (filter.inStock !== undefined) {
-        params = params.set('inStock', filter.inStock.toString());
-      }
-      if (filter.searchTerm) {
-        params = params.set('searchTerm', filter.searchTerm);
-      }
-    }
+  getProducts(filter?: any, page = 1, pageSize = 12): Observable<any> {
+    this.loading.set(true);
+    this.error.set(null);
 
     return this.http
-      .get<ApiResponse<PaginatedResponse<Product>>>(`${this.apiUrl}/products`, {
-        params,
+      .get<any>('http://localhost:3333/items', {
+        headers: this.getHeaders(),
+        params: filter?.searchTerm
+          ? { search: filter.searchTerm }
+          : {},
       })
       .pipe(
         map((response) => {
-          this.loadingSignal.set(false);
-          if (!response.success) {
-            throw new Error(response.error || 'Failed to load products');
-          }
-          return response.data;
+          this.loading.set(false);
+
+          const items = response.data.map((item: any) => ({
+            id: item._id,
+            name: item.title,
+            description: item.description,
+            category: item.category,
+            price: item.price,
+            imageUrl: 'https://placehold.co/300x300?text=Catalog+Item',
+            inStock: true,
+            rating: 5,
+            reviewCount: 0,
+          }));
+
+          return {
+            items,
+            total: items.length,
+            page: 1,
+            pageSize: items.length,
+            totalPages: 1,
+          };
         }),
         catchError((error) => {
-          this.loadingSignal.set(false);
-          this.errorSignal.set(
-            error.message || 'An error occurred while loading products'
-          );
-          console.error('Error loading products:', error);
+          this.loading.set(false);
+          this.error.set(error.message);
+          console.error(error);
+
           return of({
             items: [],
             total: 0,
             page: 1,
-            pageSize: 12,
+            pageSize: 0,
             totalPages: 0,
           });
         })
@@ -77,63 +72,14 @@ export class ProductsService {
   }
 
   getProductById(id: string): Observable<Product | null> {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-
-    return this.http
-      .get<ApiResponse<Product>>(`${this.apiUrl}/products/${id}`)
-      .pipe(
-        map((response) => {
-          this.loadingSignal.set(false);
-          if (!response.success) {
-            throw new Error(response.error || 'Failed to load product');
-          }
-          return response.data;
-        }),
-        catchError((error) => {
-          this.loadingSignal.set(false);
-          this.errorSignal.set(
-            error.message || 'An error occurred while loading the product'
-          );
-          console.error('Error loading product:', error);
-          return of(null);
-        })
-      );
+    return of(null);
   }
 
   getCategories(): Observable<string[]> {
-    return this.http
-      .get<ApiResponse<string[]>>(`${this.apiUrl}/products-metadata/categories`)
-      .pipe(
-        map((response) => {
-          if (!response.success) {
-            throw new Error(response.error || 'Failed to load categories');
-          }
-          return response.data;
-        }),
-        catchError((error) => {
-          console.error('Error loading categories:', error);
-          return of([]);
-        })
-      );
+    return of([]);
   }
 
   getPriceRange(): Observable<{ min: number; max: number }> {
-    return this.http
-      .get<ApiResponse<{ min: number; max: number }>>(
-        `${this.apiUrl}/products-metadata/price-range`
-      )
-      .pipe(
-        map((response) => {
-          if (!response.success) {
-            throw new Error(response.error || 'Failed to load price range');
-          }
-          return response.data;
-        }),
-        catchError((error) => {
-          console.error('Error loading price range:', error);
-          return of({ min: 0, max: 1000 });
-        })
-      );
+    return of({ min: 0, max: 1000 });
   }
 }
