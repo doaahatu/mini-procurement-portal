@@ -1,54 +1,140 @@
-Mini Procurement Portal
+# Mini Procurement Portal
 
 A full-stack catalog management application built for the YOUMNA technical assessment.
 
-The application allows authenticated users to manage procurement catalog items through a protected Angular frontend connected to an Express API and MongoDB Atlas.
+The portal allows authenticated users to manage procurement catalog items through a protected Angular frontend, a NestJS API, and MongoDB Atlas.
 
-⸻
+---
 
-Tech Stack
+## Table of Contents
 
-* Nx Monorepo
-* Angular
-* NgRx
-* Express.js API
-* MongoDB Atlas
-* JWT Authentication
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Application Flow](#application-flow)
+- [API Endpoints](#api-endpoints)
+- [Data Models](#data-models)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [Installation](#installation)
+- [Running Locally](#running-locally)
+- [Testing the Application Manually](#testing-the-application-manually)
+- [Architectural Decisions](#architectural-decisions)
+- [Assumptions](#assumptions)
+- [Bonus Items](#bonus-items)
+- [Future Improvements](#future-improvements)
 
-⸻
+---
 
-Features
+## Overview
 
-Authentication
+Mini Procurement Portal is a catalog management system focused on authentication and protected catalog operations.
 
-* User sign-up
-* User sign-in
-* User sign-out
-* JWT-based authentication
-* Sessions persist for 8 hours
-* Protected routes redirect unauthenticated users to the sign-in page
+Users can:
 
-Catalog Management
+- Sign up
+- Sign in
+- Sign out
+- Access a protected catalog page
+- Search catalog items
+- Create new catalog items
+- Persist catalog data in MongoDB
 
-* Protected catalog page
-* Catalog items fetched from the backend API
-* Loading state
-* Empty state
-* Error state
-* Basic search/filter
+The project is implemented as an Nx monorepo to organize frontend, backend, and shared libraries in a scalable structure.
 
-Create Catalog Item
+---
 
-* Protected form for creating catalog items
-* Created items are persisted in MongoDB
-* Catalog list updates after successful item creation
+## Tech Stack
 
-⸻
+| Layer | Technology |
+|---|---|
+| Monorepo | Nx |
+| Frontend | Angular |
+| State Management | NgRx |
+| Backend | NestJS API |
+| Database | MongoDB Atlas |
+| Authentication | JWT |
+| Styling | CSS |
+| Package Manager | npm |
 
-Data Models
+---
 
-User
+## Features
 
+### Authentication
+
+- User sign-up
+- User sign-in
+- User sign-out
+- JWT-based authentication
+- Session persistence for 8 hours
+- Manual sign-out clears local session data
+- Protected frontend routes redirect unauthenticated users to the sign-in page
+- Protected backend endpoints require a valid JWT token
+
+### Catalog Management
+
+- Protected catalog page
+- Catalog items are fetched from the backend API
+- Basic search/filter functionality
+- Loading state
+- Empty state
+- Error state
+
+### Create Catalog Item
+
+- Protected create-item form
+- Creates new catalog items through the backend API
+- Persists created items in MongoDB
+- Redirects back to the catalog after successful creation
+- Catalog list reflects the newly created item after submission
+
+---
+
+## Application Flow
+
+1. A new user creates an account using the sign-up page.
+2. The backend hashes the password and stores the user in MongoDB.
+3. The backend returns a JWT token that expires after 8 hours.
+4. The frontend stores the token and user session data locally.
+5. Authenticated users can access the protected catalog page.
+6. Catalog items are fetched from the NestJS API.
+7. Users can search/filter catalog items.
+8. Users can create new catalog items.
+9. Created items are stored in MongoDB and shown in the catalog.
+10. On sign-out, local session data is cleared and the user is redirected to sign-in.
+
+---
+
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Description | Protected |
+|---|---|---|---|
+| POST | `/auth/signup` | Register a new user | No |
+| POST | `/auth/signin` | Sign in and receive JWT token | No |
+
+### Catalog Items
+
+| Method | Endpoint | Description | Protected |
+|---|---|---|---|
+| GET | `/items` | Get catalog items | Yes |
+| POST | `/items` | Create a new catalog item | Yes |
+
+### Root
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | API health message |
+
+---
+
+## Data Models
+
+### User
+
+```ts
 {
   id: string;
   name: string;
@@ -58,7 +144,6 @@ User
 }
 
 CatalogItem
-
 {
   id: string;
   title: string;
@@ -69,125 +154,241 @@ CatalogItem
   createdAt: Date;
 }
 
-⸻
+Project Structure
+apps/
+  api/
+    src/
+      main.ts
+      app.module.ts
+      app.controller.ts
+    project.json
 
-API Endpoints
+  shop/
+    src/
+      app/
+        app.routes.ts
+        app.routes.server.ts
+        app.config.ts
 
-Authentication
+libs/
+  shop/
+    data/
+      src/lib/services/
+        auth.service.ts
+        auth.guard.ts
+        products.service.ts
 
-POST /auth/signup
-POST /auth/signin
+    feature-auth/
+      src/lib/
+        signin/
+        signup/
+        create-item/
 
-Catalog Items
+    feature-products/
+      src/lib/product-list/
 
-GET /items
-POST /items
+    feature-product-detail/
 
-⸻
+    shared-ui/
 
-Environment Variables
+  shared/
+    models/
 
-Create a .env file in the project root.
 
-Example:
+## Environment Variables
 
+Create a `.env` file in the project root:
+
+```env
 MONGODB_URI=your_mongodb_atlas_connection_string
 JWT_SECRET=your_jwt_secret
 PORT=3333
+```
 
-Do not commit .env to GitHub.
+Example:
 
-⸻
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/procurement-portal
+JWT_SECRET=replace_with_a_secure_secret
+PORT=3333
+```
 
-Installation
+> The `.env` file is ignored by Git and should never be committed.
 
+---
+
+## Installation
+
+Install project dependencies:
+
+```bash
 npm install
+```
 
-⸻
+---
 
-Running Locally
+## Running Locally
 
-Run the backend API:
+### Start the Backend API
 
+```bash
 npx nx serve api
+```
 
-The API runs on:
+The API will run on:
 
+```text
 http://localhost:3333
+```
 
-Run the frontend application in a second terminal:
+### Start the Frontend Application
 
+Open a second terminal and run:
+
+```bash
 npx nx serve shop --skip-nx-cache
+```
 
-The frontend runs on:
+The frontend will run on:
 
+```text
 http://localhost:4200
+```
 
-⸻
+---
 
-Local Testing Flow
+## Testing the Application
 
-1. Open the frontend at http://localhost:4200
-2. Sign up with a new user account
-3. Sign out
-4. Sign in using the created credentials
-5. View the protected catalog page
-6. Create a new catalog item
-7. Confirm the item appears in the catalog list
-8. Test search/filter functionality
-9. Sign out and verify protected routes redirect to /signin
+### 1. Create a New Account
 
-⸻
+Navigate to:
 
-Project Structure
+```text
+http://localhost:4200/signup
+```
 
-apps/
-  api/        Backend API
-  shop/       Angular frontend
-libs/
-  shop/data                  Data access and auth services
-  shop/feature-auth          Authentication and create-item pages
-  shop/feature-products      Catalog list page
-  shop/feature-product-detail
-  shop/shared-ui             Shared UI components
-  shared/models              Shared TypeScript models
+Register a new user account.
 
-⸻
+### 2. Sign In
 
-Architectural Decisions
+Navigate to:
 
-* Nx was used to organize the frontend, backend, and shared libraries in one monorepo.
-* Angular standalone components were used for modular frontend features.
-* JWT authentication was used for stateless session handling.
-* MongoDB Atlas was used for persistent cloud database storage.
-* Protected frontend routes use an auth guard to prevent unauthenticated access.
-* Protected backend endpoints require a valid JWT token.
-* NgRx was added to support scalable frontend state management.
+```text
+http://localhost:4200/signin
+```
 
-⸻
+Log in using the registered credentials.
 
-Assumptions
+### 3. Verify Protected Routes
 
-* JWT sessions expire after 8 hours.
-* Only authenticated users can access catalog data or create catalog items.
-* MongoDB Atlas is used as the database provider.
-* The application is intended to run locally for assessment review.
+Attempt to access:
 
-⸻
+```text
+http://localhost:4200/products
+```
 
-Bonus / Additional Work
+without being authenticated.
 
-* MongoDB Atlas integration
-* Basic pagination support from the original catalog structure
-* Docker support from the generated API project structure
+Expected behavior:
 
-⸻
+```text
+Redirect to /signin
+```
 
-Future Improvements
+### 4. View Catalog Items
 
-* Forgot password flow
-* More complete NgRx feature stores
-* Unit tests
-* Seed script
-* Docker Compose setup
-* Deployment to GCP
+After signing in, open the Catalog page and verify that catalog items are loaded from MongoDB through the NestJS API.
+
+### 5. Search Catalog Items
+
+Use the search field to filter items by:
+
+- Title
+- Description
+- Category
+
+### 6. Create a New Catalog Item
+
+Navigate to:
+
+```text
+http://localhost:4200/create-item
+```
+
+Create a new catalog item and verify that it appears in the catalog list.
+
+---
+
+## Architectural Decisions
+
+### Nx Monorepo
+
+Nx was used to organize the frontend, backend, and shared libraries in a single scalable workspace.
+
+### Angular Frontend
+
+Angular was selected for its strong routing system, standalone components, dependency injection, and maintainable architecture.
+
+### NgRx State Management
+
+NgRx was integrated to align with the required technology stack and provide a foundation for scalable state management.
+
+### NestJS Backend
+
+The backend was implemented using NestJS within the Nx monorepo. The API provides authentication and catalog management endpoints while maintaining a modular architecture.
+
+### MongoDB Atlas
+
+MongoDB Atlas was used to persist users and catalog items in a cloud-hosted NoSQL database.
+
+### JWT Authentication
+
+JWT tokens are issued upon successful authentication and remain valid for 8 hours. Protected routes and endpoints require a valid token.
+
+### Protected Routes
+
+Angular route guards restrict access to catalog and item creation pages for unauthenticated users.
+
+---
+
+## Assumptions
+
+- The assessment scope is limited to catalog management.
+- Order placement and order tracking are intentionally excluded.
+- Sessions remain active for 8 hours unless the user signs out.
+- Any authenticated user can view catalog items.
+- Any authenticated user can create catalog items.
+- MongoDB Atlas is used as the primary database.
+- The application is intended to run locally for evaluation.
+
+---
+
+## Bonus Features Implemented
+
+- MongoDB Atlas integration
+- Search and filtering functionality
+- Protected frontend routes
+- Protected backend endpoints
+- JWT-based authentication
+- Nx monorepo architecture
+
+---
+
+## Future Improvements
+
+- Full NgRx store implementation for authentication and catalog state
+- Pagination support
+- Improved form validation and error handling
+- Unit and integration testing
+- Seed script for sample catalog data
+- Docker Compose setup
+- Cloud deployment (GCP/AWS)
+
+---
+
+## Repository
+
+```text
+https://github.com/doaahatu/mini-procurement-portal
+```
+
